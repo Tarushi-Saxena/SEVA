@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { generateFirstAidTips } from "@/lib/gemini";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatMessage {
   id: string;
@@ -114,19 +116,19 @@ export default function FirstAid() {
                     {message.isUser ? (
                       <p className="text-sm">{message.text}</p>
                     ) : (
-                      <div className="text-sm">
-                        {message.text.split('\n').map((line, index) => (
-                          <div key={index} className="mb-2">
-                            {line.match(/^\d+\./) ? (
-                              <div className="flex items-start">
-                                <span className="font-semibold text-red-600 mr-2 flex-shrink-0">{line.match(/^\d+\./)?.[0]}</span>
-                                <span>{line.replace(/^\d+\.\s*/, '')}</span>
-                              </div>
-                            ) : line.trim() ? (
-                              <span>{line}</span>
-                            ) : null}
-                          </div>
-                        ))}
+                      <div className="prose prose-sm max-w-none prose-p:leading-snug prose-headings:mb-2 prose-headings:mt-4 first:prose-headings:mt-0">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            h2: ({node, ...props}) => <h2 className="text-base font-bold text-red-700 border-b border-red-100 pb-1 mb-3 mt-4 flex items-center" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-3 my-3" {...props} />,
+                            li: ({node, ...props}) => <li className="text-gray-700 marker:text-blue-600 marker:font-bold" {...props} />,
+                            p: ({node, ...props}) => <p className="text-gray-600 mb-2 last:mb-0" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />
+                          }}
+                        >
+                          {message.text}
+                        </ReactMarkdown>
                       </div>
                     )}
                     <p className={`text-xs mt-1 ${
